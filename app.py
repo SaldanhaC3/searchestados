@@ -28,7 +28,9 @@ if st.button("Buscar") and keyword:
         tci = row['TCI']
         uule = row['UULE']
         search_url = build_search_url(keyword, tci, uule)
-        results.append({"Capital": capital, "Link de Busca": search_url})
+        # Adiciona HTML para links clicáveis
+        clickable_link = f'<a href="{search_url}" target="_blank">Ver busca</a>'
+        results.append({"Capital": capital, "Link de Busca": clickable_link})
 
     # Exibindo resultados na tabela
     if results:
@@ -36,7 +38,12 @@ if st.button("Buscar") and keyword:
         st.write(results_df.to_html(escape=False, index=False), unsafe_allow_html=True)
 
         # Download dos resultados em CSV
-        csv = results_df.to_csv(index=False).encode("utf-8")
+        # Sem HTML nos links para o arquivo CSV
+        csv_df = pd.DataFrame(
+            [{"Capital": row["Capital"], "Link de Busca": build_search_url(keyword, row["TCI"], row["UULE"])}
+             for _, row in capitals_df.iterrows()]
+        )
+        csv = csv_df.to_csv(index=False).encode("utf-8")
         st.download_button(
             label="Baixar resultados em CSV",
             data=csv,
