@@ -4,26 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Busca por Capitais</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        /* Variáveis de Cor */
+        :root {
+            --primary-color: #007acc;
+            --secondary-color: #005fa3;
+            --bg-light: #f0f2f5;
+            --bg-dark: #2c2f33;
+            --text-light: #fff;
+            --text-dark: #333;
+        }
+
         /* Estilos Gerais */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Roboto', sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-color: #e9f5fb;
-            color: #333;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
             padding: 40px 20px;
+            transition: background-color 0.3s, color 0.3s;
         }
 
+        /* Título */
         h1 {
-            color: #007acc;
+            color: var(--primary-color);
             font-size: 2.5em;
             font-weight: bold;
             margin-bottom: 20px;
             text-align: center;
         }
 
+        /* Formulário de Busca */
         form {
             display: flex;
             flex-direction: row;
@@ -32,7 +47,7 @@
             width: 100%;
             max-width: 600px;
             justify-content: center;
-            background-color: #ffffff;
+            background-color: var(--text-light);
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
@@ -41,7 +56,7 @@
         input[type="text"] {
             padding: 12px;
             flex: 1;
-            border: 2px solid #007acc;
+            border: 2px solid var(--primary-color);
             border-radius: 5px;
             font-size: 1em;
             transition: border-color 0.3s;
@@ -49,13 +64,13 @@
 
         input[type="text"]:focus {
             outline: none;
-            border-color: #005fa3;
+            border-color: var(--secondary-color);
         }
 
         button {
             padding: 12px 20px;
-            background-color: #007acc;
-            color: #fff;
+            background-color: var(--primary-color);
+            color: var(--text-light);
             border: none;
             border-radius: 5px;
             cursor: pointer;
@@ -64,7 +79,7 @@
         }
 
         button:hover {
-            background-color: #005fa3;
+            background-color: var(--secondary-color);
             transform: translateY(-2px);
         }
 
@@ -74,10 +89,11 @@
             border-collapse: collapse;
             width: 100%;
             max-width: 800px;
-            background-color: #ffffff;
+            background-color: var(--text-light);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
             overflow: hidden;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         th, td {
@@ -87,22 +103,22 @@
         }
 
         th {
-            background-color: #007acc;
-            color: #fff;
+            background-color: var(--primary-color);
+            color: var(--text-light);
             font-weight: bold;
             text-transform: uppercase;
             font-size: 0.9em;
         }
 
         td a {
-            color: #007acc;
+            color: var(--primary-color);
             text-decoration: none;
             font-weight: bold;
             transition: color 0.3s;
         }
 
         td a:hover {
-            color: #005fa3;
+            color: var(--secondary-color);
             text-decoration: underline;
         }
 
@@ -116,7 +132,7 @@
             margin-top: 20px;
             padding: 12px 20px;
             background-color: #28a745;
-            color: #fff;
+            color: var(--text-light);
             border: none;
             border-radius: 5px;
             cursor: pointer;
@@ -129,14 +145,15 @@
             transform: translateY(-2px);
         }
 
-        /* Animação de Fade-In */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* Tema Escuro */
+        body.dark-theme {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
         }
 
-        h2, table, #download-btn {
-            animation: fadeIn 0.6s ease-in-out;
+        table.dark-theme {
+            background-color: #40444b;
+            color: #ddd;
         }
     </style>
 </head>
@@ -144,12 +161,12 @@
     <h1>Busca por Capitais</h1>
     <form method="POST" action="/">
         <input type="text" name="keyword" placeholder="Digite a palavra-chave" required>
-        <button type="submit">Buscar</button>
+        <button type="submit"><i class="fas fa-search"></i> Buscar</button>
     </form>
-
+    
     {% if results %}
         <h2>Resultados para "{{ keyword }}"</h2>
-        <table>
+        <table id="results-table">
             <tr>
                 <th>Capital</th>
                 <th>Link de Busca</th>
@@ -161,8 +178,13 @@
                 </tr>
             {% endfor %}
         </table>
-        <button id="download-btn" onclick="downloadCSV()">Download CSV</button>
+        <button id="download-btn" onclick="downloadCSV()"><i class="fas fa-download"></i> Download CSV</button>
     {% endif %}
+
+    <!-- Script para alternar tema -->
+    <script>
+        document.body.classList.toggle('dark-theme');
+    </script>
 
     <script>
         function downloadCSV() {
