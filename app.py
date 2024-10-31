@@ -32,14 +32,16 @@ if keyword:
         tci = row['TCI']
         uule = row['UULE']
         search_url = build_search_url(keyword, tci, uule)
-        # Criar link clicável
-        clickable_link = f"[Ver busca]({search_url})"
+        clickable_link = f'<a href="{search_url}" target="_blank">Ver busca</a>'
         results.append({"Capital": capital, "Link de Busca": clickable_link})
     
-    # Exibir os resultados em uma tabela
+    # Exibir os resultados em uma tabela com HTML para links
     results_df = pd.DataFrame(results)
     st.write("### Resultados")
-    st.write(results_df.to_markdown(), unsafe_allow_html=True)
+    st.write(
+        results_df.to_html(escape=False, index=False), 
+        unsafe_allow_html=True
+    )
     
     # Botão para download do CSV
     csv = results_df.to_csv(index=False)
