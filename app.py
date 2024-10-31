@@ -1,15 +1,12 @@
-from flask import Flask, render_template, request, redirect, url_for
+import streamlit as st
 import pandas as pd
 
-app = Flask(__name__)
-
-# Carregar o arquivo CSV com as capitais, códigos TCI e UULE atualizado
+# Carregar o arquivo CSV com as capitais, TCI e UULE
 capitals_df = pd.read_csv("tci_capitais_brasil_completo_atualizado.csv")
 
-# Função para construir a URL de busca com os parâmetros `tci` e `uule`
+# Função para construir a URL de busca
 def build_search_url(keyword, tci, uule):
     base_url = "https://www.google.com.br/search"
-    # Construir a URL manualmente para evitar codificação de caracteres especiais
     search_url = (
         f"{base_url}?q={keyword.replace(' ', '%20')}"
         f"&glp=1&adtest=on&hl=PT&tci=g:{tci}"
@@ -17,25 +14,36 @@ def build_search_url(keyword, tci, uule):
     )
     return search_url
 
-@app.route("/", methods=["GET", "POST"])
-def index():
-    if request.method == "POST":
-        keyword = request.form.get("keyword")
-        if not keyword:
-            return redirect(url_for("index"))
+# Configurações da página
+st.set_page_config(page_title="Busca por Capitais", layout="centered")
 
-        # Gerar a lista de links de busca para cada capital
-        results = []
-        for _, row in capitals_df.iterrows():
-            capital = row['Capital']
-            tci = row['TCI']
-            uule = row['UULE']
-            search_url = build_search_url(keyword, tci, uule)
-            results.append({"capital": capital, "link": search_url})
+# Título da página
+st.title("Busca por Capitais")
 
-        return render_template("index.html", keyword=keyword, results=results)
+# Campo de entrada para a palavra-chave
+keyword = st.text_input("Digite a palavra-chave para a busca:")
 
-    return render_template("index.html", results=None)
-
-if __name__ == "__main__":
-    app.run(debug=True)
+# Verifica se uma palavra-chave foi inserida
+if keyword:
+    # Gerar a lista de links de busca para cada capital
+    results = []
+    for _, row in capitals_df.iterrows():
+        capital = row['Capital']
+        tci = row['TCI']
+        uule = row['UULE']
+        search_url = build_search_url(keyword, tci, uule)
+        results.append({"Capital": capital, "Link de Busca": search_url})
+    
+    # Exibir os resultados em uma tabela
+    results_df = pd.DataFrame(results)
+    st.write("### Resultados")
+    st.table(results_df)
+    
+    # Botão para download do CSV
+    csv = results_df.to_csv(index=False)
+    st.download_button(
+        label="Download CSV",
+        data=csv,
+        file_name="resultados_busca_capitais.csv",
+        mime="text/csv",
+    )
