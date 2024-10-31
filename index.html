@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Busca por Capitais</title>
+    <style>
+        /* Estilos Gerais */
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f2f5;
+            color: #333;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            color: #007acc;
+            font-size: 2em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        form {
+            display: flex;
+            flex-direction: row;
+            gap: 15px;
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 600px;
+            justify-content: center;
+        }
+
+        input[type="text"] {
+            padding: 12px;
+            flex: 1;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+
+        button {
+            padding: 12px 20px;
+            background-color: #007acc;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: #005fa3;
+            transform: translateY(-2px);
+        }
+
+        /* Estilos da Tabela */
+        table {
+            margin-top: 20px;
+            border-collapse: collapse;
+            width: 100%;
+            max-width: 800px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #f0f2f5;
+        }
+
+        th {
+            background-color: #007acc;
+            color: #fff;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.9em;
+        }
+
+        td a {
+            color: #007acc;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        td a:hover {
+            text-decoration: underline;
+        }
+
+        td {
+            color: #555;
+            font-size: 0.95em;
+        }
+
+        /* Botão de Download */
+        #download-btn {
+            margin-top: 20px;
+            padding: 12px 20px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        #download-btn:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <h1>Busca por Capitais</h1>
+    <form method="POST" action="/">
+        <input type="text" name="keyword" placeholder="Digite a palavra-chave" required>
+        <button type="submit">Buscar</button>
+    </form>
+
+    {% if results %}
+        <h2>Resultados para "{{ keyword }}"</h2>
+        <table>
+            <tr>
+                <th>Capital</th>
+                <th>Link de Busca</th>
+            </tr>
+            {% for result in results %}
+                <tr>
+                    <td>{{ result.capital }}</td>
+                    <td><a href="{{ result.link }}" target="_blank">Ver busca</a></td>
+                </tr>
+            {% endfor %}
+        </table>
+        <button id="download-btn" onclick="downloadCSV()">Download CSV</button>
+    {% endif %}
+
+    <script>
+        function downloadCSV() {
+            {% if results %}
+                let csvContent = 'Capital,Link de Busca\n';
+                {% for result in results %}
+                    csvContent += `"{{ result.capital }}","{{ result.link }}"\n`;
+                {% endfor %}
+
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = "resultados_busca_capitais.csv";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            {% else %}
+                alert("Nenhum resultado disponível para download.");
+            {% endif %}
+        }
+    </script>
+</body>
+</html>
