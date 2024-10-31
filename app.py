@@ -1,10 +1,12 @@
-import streamlit as st
+from flask import Flask, render_template, request, redirect, url_for
 import pandas as pd
 
-# Carregar o arquivo CSV com as capitais, TCI e UULE
+app = Flask(__name__)
+
+# Carregar o arquivo CSV com as capitais, códigos TCI e UULE atualizado
 capitals_df = pd.read_csv("tci_capitais_brasil_completo_atualizado.csv")
 
-# Função para construir a URL de busca
+# Função para construir a URL de busca com os parâmetros `tci` e `uule`
 def build_search_url(keyword, tci, uule):
     base_url = "https://www.google.com.br/search"
     search_url = (
@@ -14,40 +16,25 @@ def build_search_url(keyword, tci, uule):
     )
     return search_url
 
-# Configurações da página
-st.set_page_config(page_title="Busca por Capitais", layout="centered")
+@app.route("/", methods=["GET", "POST"])
+def index():
+    if request.method == "POST":
+        keyword = request.form.get("keyword")
+        if not keyword:
+            return redirect(url_for("index"))
 
-# Título da página
-st.title("Busca por Capitais")
+        # Gerar a lista de links de busca para cada capital
+        results = []
+        for _, row in capitals_df.iterrows():
+            capital = row['Capital']
+            tci = row['TCI']
+            uule = row['UULE']
+            search_url = build_search_url(keyword, tci, uule)
+            results.append({"capital": capital, "link": search_url})
 
-# Campo de entrada para a palavra-chave
-keyword = st.text_input("Digite a palavra-chave para a busca:")
+        return render_template("index.html", keyword=keyword, results=results)
 
-# Verifica se uma palavra-chave foi inserida
-if keyword:
-    # Gerar a lista de links de busca para cada capital
-    results = []
-    for _, row in capitals_df.iterrows():
-        capital = row['Capital']
-        tci = row['TCI']
-        uule = row['UULE']
-        search_url = build_search_url(keyword, tci, uule)
-        clickable_link = f'<a href="{search_url}" target="_blank">Ver busca</a>'
-        results.append({"Capital": capital, "Link de Busca": clickable_link})
-    
-    # Exibir os resultados em uma tabela com HTML para links
-    results_df = pd.DataFrame(results)
-    st.write("### Resultados")
-    st.write(
-        results_df.to_html(escape=False, index=False), 
-        unsafe_allow_html=True
-    )
-    
-    # Botão para download do CSV
-    csv = results_df.to_csv(index=False)
-    st.download_button(
-        label="Download CSV",
-        data=csv,
-        file_name="resultados_busca_capitais.csv",
-        mime="text/csv",
-    )
+    return render_template("index.html", results=None)
+
+if __name__ == "__main__":
+    app.run(debug=True)
